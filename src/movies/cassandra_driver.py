@@ -6,10 +6,10 @@ CREATE_KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS movies WITH replication = {'cla
 CREATE_TABLE_MOVIE_BY_TITLE = "CREATE TABLE IF NOT EXISTS movies.movie_by_title (title text, year int, director text, genre text, rating float, PRIMARY KEY (title, year));"
 CREATE_TABLE_MOVIE_BY_GENRE = "CREATE TABLE IF NOT EXISTS movies.movie_by_genre (genre text, title text, year int, director text, rating float, PRIMARY KEY (genre, title));"
 INSERT_MOVIE_TITLE = "INSERT INTO movies.movie_by_title (title, year, director, genre, rating) VALUES (?, ?, ?, ?, ?);"
-INSERT_MOVIE_GENRE = "INSERT INTO movies.movie_by_genre (genre, title, year, director, rating) VALUES (?, ?, ?, ?, ?);"
-DELETE_MOVIE_TITLE = "DELETE FROM movies.movie_by_title WHERE title=? AND year=?"
+INSERT_MOVIE_GENRE = ""
+DELETE_MOVIE_TITLE = "DELETE FROM movies.movie_by_title WHERE title=? AND genre=?"
 DELETE_MOVIE_GENRE = "DELETE FROM movies.movie_by_genre WHERE genre=? AND title=?"
-SELECT_BY_TITLE = "SELECT * FROM movies.movie_by_title WHERE title=? AND year=?"
+SELECT_BY_TITLE = "SELECT * FROM movies.movie_by_title WHERE title=? AND release_year=?"
 SELECT_BY_GENRE = "SELECT * FROM movies.movie_by_genre WHERE genre=?"
 
 # ==============================
