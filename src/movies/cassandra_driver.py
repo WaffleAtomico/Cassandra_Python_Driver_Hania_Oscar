@@ -26,15 +26,24 @@ def insert_movie(session, title, year, director, genre, rating):
     pass
 
 def query_by_title(session, title, year):
+    session.prepare(SELECT_BY_TITLE)
+    session.execute(SELECT_BY_TITLE, (title, year))
     pass
 
 def query_by_genre(session, genre):
+    session.prepare(SELECT_BY_GENRE)
+    session.execute(SELECT_BY_GENRE, (genre))
     pass
 
 def update_movie_director(session, title, genre, new_director):
+
     pass
 
 def delete_movie(session, title, genre, rating, release_year):
+    session.prepare(DELETE_MOVIE_TITLE)
+    session.execute(DELETE_MOVIE_TITLE, (title, genre))
+    session.prepare(DELETE_MOVIE_GENRE)
+    session.execute(DELETE_MOVIE_GENRE, (genre, title))
     pass
 
 # ==============================
