@@ -8,7 +8,7 @@ from cassandra.cluster import Cluster
 
 
 CREATE_KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS movies WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
-CREATE_TABLE_MOVIE_BY_TITLE = """CREATE TABLE IF NOT EXISTS movies.movie_by_title"
+CREATE_TABLE_MOVIE_BY_TITLE = """CREATE TABLE IF NOT EXISTS movies.movie_by_title
                                                     (movie_id uuid,
                                                     title text, 
                                                     release_year int,
@@ -16,8 +16,7 @@ CREATE_TABLE_MOVIE_BY_TITLE = """CREATE TABLE IF NOT EXISTS movies.movie_by_titl
                                                     genre text,
                                                     rating float,
                                                     PRIMARY KEY (title, release_year)
-                                                    );
-                             """
+                                                    );"""
 CREATE_TABLE_MOVIE_BY_GENRE = """CREATE TABLE IF NOT EXISTS movies.movie_by_genre 
                                                     (movie_id uuid,
                                                     title text,
@@ -26,12 +25,13 @@ CREATE_TABLE_MOVIE_BY_GENRE = """CREATE TABLE IF NOT EXISTS movies.movie_by_genr
                                                     genre text,
                                                     rating float, 
                                                     PRIMARY KEY ((title, genre), rating)
-                                                    );
-                              """
+                                                    );"""
 INSERT_MOVIE_TITLE = "INSERT INTO movies.movie_by_title (movie_id, title, release_year, director, genre, rating) VALUES (?, ?, ?, ?, ?, ?);"
 INSERT_MOVIE_GENRE = "INSERT INTO movies.movie_by_genre (movie_id, title, release_year, director, genre, rating) VALUES (?, ?, ?, ?, ?, ?);"
 DELETE_MOVIE_TITLE = "DELETE FROM movies.movie_by_title WHERE title=? AND release_year=?"
 DELETE_MOVIE_GENRE = "DELETE FROM movies.movie_by_genre WHERE genre=? AND title=?"
+UPDATE_DIRECTOR_IN_TITLE = "UPDATE movies.movie_by_title SET director=? WHERE title=? AND release_year=?"
+UPDATE_DIRECTOR_IN_GENRE = "UPDATE movies.movie_by_genre SET director=? WHERE genre=? AND title=?"
 SELECT_BY_TITLE = "SELECT * FROM movies.movie_by_title WHERE title=? AND release_year=?"
 SELECT_BY_GENRE = "SELECT * FROM movies.movie_by_genre WHERE genre=?"
 
@@ -40,7 +40,7 @@ SELECT_BY_GENRE = "SELECT * FROM movies.movie_by_genre WHERE genre=?"
 # Funciones base
 # ==============================
 
-def create_keyspace_and_tables(session: Cluster.Session):
+def create_keyspace_and_tables(session):
     session.prepare(CREATE_KEYSPACE)
     session.execute(CREATE_KEYSPACE)
 
@@ -60,28 +60,26 @@ def insert_movie(session, title, year, director, genre, rating):
     session.prepare(INSERT_MOVIE_GENRE)
     session.execute(INSERT_MOVIE_GENRE, (new_movie_id, genre, title, year, director, rating))
 
-    pass
-
 def query_by_title(session, title, year):
     session.prepare(SELECT_BY_TITLE)
-    session.execute(SELECT_BY_TITLE, (title, year))
-    pass
+    session.execute(SELECT_BY_TITLE, (title, year)) #  TODO: printear formateado lindo en tablita
 
 def query_by_genre(session, genre):
     session.prepare(SELECT_BY_GENRE)
     session.execute(SELECT_BY_GENRE, (genre))
-    pass
 
-def update_movie_director(session, title, genre, new_director):
+def update_movie_director(session, title, genre, year, new_director):
+    session.prepare(UPDATE_DIRECTOR_IN_TITLE)
+    session.execute(UPDATE_DIRECTOR_IN_TITLE, (new_director, title, year))
 
-    pass
+    session.prepare(UPDATE_DIRECTOR_IN_GENRE)
+    session.execute(UPDATE_DIRECTOR_IN_GENRE, (new_director, genre, title))
 
 def delete_movie(session, title, genre, release_year):
     session.prepare(DELETE_MOVIE_TITLE)
     session.execute(DELETE_MOVIE_TITLE, (title, release_year))
     session.prepare(DELETE_MOVIE_GENRE)
     session.execute(DELETE_MOVIE_GENRE, (genre, title))
-    pass
 
 # ==============================
 # Menú
@@ -116,8 +114,9 @@ def main():
         elif choice == "4":
             title = input("Título: ")
             genre = input("Género: ")
+            year = int(input("Año: "))
             new_director = input("Nuevo Director: ")
-            update_movie_director(session, title, genre, new_director)
+            update_movie_director(session, title, genre, year, new_director)
         elif choice == "5":
             # Eliminar de movie_by_title -> title, release_year
             # Eliminar de movie_by_genre -> genre, rating
