@@ -7,7 +7,7 @@ CREATE_TABLE_MOVIE_BY_TITLE = "CREATE TABLE IF NOT EXISTS movies.movie_by_title 
 CREATE_TABLE_MOVIE_BY_GENRE = "CREATE TABLE IF NOT EXISTS movies.movie_by_genre (genre text, title text, year int, director text, rating float, PRIMARY KEY (genre, title));"
 INSERT_MOVIE_TITLE = "INSERT INTO movies.movie_by_title (title, year, director, genre, rating) VALUES (?, ?, ?, ?, ?);"
 INSERT_MOVIE_GENRE = ""
-DELETE_MOVIE_TITLE = "DELETE FROM movies.movie_by_title WHERE title=? AND genre=?"
+DELETE_MOVIE_TITLE = "DELETE FROM movies.movie_by_title WHERE title=? AND release_year=?"
 DELETE_MOVIE_GENRE = "DELETE FROM movies.movie_by_genre WHERE genre=? AND title=?"
 SELECT_BY_TITLE = "SELECT * FROM movies.movie_by_title WHERE title=? AND release_year=?"
 SELECT_BY_GENRE = "SELECT * FROM movies.movie_by_genre WHERE genre=?"
@@ -39,9 +39,9 @@ def update_movie_director(session, title, genre, new_director):
 
     pass
 
-def delete_movie(session, title, genre, rating, release_year):
+def delete_movie(session, title, genre, release_year):
     session.prepare(DELETE_MOVIE_TITLE)
-    session.execute(DELETE_MOVIE_TITLE, (title, genre))
+    session.execute(DELETE_MOVIE_TITLE, (title, release_year))
     session.prepare(DELETE_MOVIE_GENRE)
     session.execute(DELETE_MOVIE_GENRE, (genre, title))
     pass
@@ -88,7 +88,7 @@ def main():
             genre = input("Género: ")
             rating = input("Rating: ")
             release_year = input("Año: ")
-            delete_movie(session, title, genre, rating, release_year)
+            delete_movie(session, title, genre, release_year)
         elif choice == '0':
             session.shutdown()
             break
