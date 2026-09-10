@@ -6,8 +6,10 @@ readme = "README.md"
 authors = [
     { name = "WaffleAtomico", email = "penillaskakievichoscar@gmail.com" }
 ]
-requires-python = ">=3.14"
-dependencies = []
+requires-python = ">=3.11"
+dependencies = [
+    "cassandra-driver>=3.30.1",
+]
 
 [project.scripts]
 movies = "movies:main"
