@@ -30,10 +30,11 @@ CREATE_TABLE_MOVIE_BY_GENRE = """CREATE TABLE IF NOT EXISTS movies.movie_by_genr
                               """
 INSERT_MOVIE_TITLE = "INSERT INTO movies.movie_by_title (movie_id, title, release_year, director, genre, rating) VALUES (?, ?, ?, ?, ?, ?);"
 INSERT_MOVIE_GENRE = "INSERT INTO movies.movie_by_genre (movie_id, title, release_year, director, genre, rating) VALUES (?, ?, ?, ?, ?, ?);"
-DELETE_MOVIE_TITLE = "" # Hania
-DELETE_MOVIE_GENRE = "" # Hania
-SELECT_BY_TITLE = "" #Hania
-SELECT_BY_GENRE = "" #Hania
+DELETE_MOVIE_TITLE = "DELETE FROM movies.movie_by_title WHERE title=? AND genre=?"
+DELETE_MOVIE_GENRE = "DELETE FROM movies.movie_by_genre WHERE genre=? AND title=?"
+SELECT_BY_TITLE = "SELECT * FROM movies.movie_by_title WHERE title=? AND release_year=?"
+SELECT_BY_GENRE = "SELECT * FROM movies.movie_by_genre WHERE genre=?"
+
 
 # ==============================
 # Funciones base
@@ -62,15 +63,24 @@ def insert_movie(session, title, year, director, genre, rating):
     pass
 
 def query_by_title(session, title, year):
+    session.prepare(SELECT_BY_TITLE)
+    session.execute(SELECT_BY_TITLE, (title, year))
     pass
 
 def query_by_genre(session, genre):
+    session.prepare(SELECT_BY_GENRE)
+    session.execute(SELECT_BY_GENRE, (genre))
     pass
 
 def update_movie_director(session, title, genre, new_director):
+
     pass
 
 def delete_movie(session, title, genre, rating, release_year):
+    session.prepare(DELETE_MOVIE_TITLE)
+    session.execute(DELETE_MOVIE_TITLE, (title, genre))
+    session.prepare(DELETE_MOVIE_GENRE)
+    session.execute(DELETE_MOVIE_GENRE, (genre, title))
     pass
 
 # ==============================
