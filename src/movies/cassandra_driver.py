@@ -1,16 +1,40 @@
+import uuid
+
 from cassandra.cluster import Cluster
+
 # ==============================
 # CQL Statements
 # ==============================
+
+
 CREATE_KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS movies WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
-CREATE_TABLE_MOVIE_BY_TITLE = "CREATE TABLE IF NOT EXISTS movies.movie_by_title (title text, year int, director text, genre text, rating float, PRIMARY KEY (title, year));"
-CREATE_TABLE_MOVIE_BY_GENRE = "CREATE TABLE IF NOT EXISTS movies.movie_by_genre (genre text, title text, year int, director text, rating float, PRIMARY KEY (genre, title));"
-INSERT_MOVIE_TITLE = "INSERT INTO movies.movie_by_title (title, year, director, genre, rating) VALUES (?, ?, ?, ?, ?);"
-INSERT_MOVIE_GENRE = ""
+CREATE_TABLE_MOVIE_BY_TITLE = """CREATE TABLE IF NOT EXISTS movies.movie_by_title"
+                                                    (movie_id uuid,
+                                                    title text, 
+                                                    release_year int,
+                                                    director text,
+                                                    genre text,
+                                                    rating float,
+                                                    PRIMARY KEY (title, release_year)
+                                                    );
+                             """
+CREATE_TABLE_MOVIE_BY_GENRE = """CREATE TABLE IF NOT EXISTS movies.movie_by_genre 
+                                                    (movie_id uuid,
+                                                    title text,
+                                                    release_year int,
+                                                    director text, 
+                                                    genre text,
+                                                    rating float, 
+                                                    PRIMARY KEY ((title, genre), rating)
+                                                    );
+                              """
+INSERT_MOVIE_TITLE = "INSERT INTO movies.movie_by_title (movie_id, title, release_year, director, genre, rating) VALUES (?, ?, ?, ?, ?, ?);"
+INSERT_MOVIE_GENRE = "INSERT INTO movies.movie_by_genre (movie_id, title, release_year, director, genre, rating) VALUES (?, ?, ?, ?, ?, ?);"
 DELETE_MOVIE_TITLE = "DELETE FROM movies.movie_by_title WHERE title=? AND release_year=?"
 DELETE_MOVIE_GENRE = "DELETE FROM movies.movie_by_genre WHERE genre=? AND title=?"
 SELECT_BY_TITLE = "SELECT * FROM movies.movie_by_title WHERE title=? AND release_year=?"
 SELECT_BY_GENRE = "SELECT * FROM movies.movie_by_genre WHERE genre=?"
+
 
 # ==============================
 # Funciones base
@@ -20,9 +44,22 @@ def create_keyspace_and_tables(session: Cluster.Session):
     session.prepare(CREATE_KEYSPACE)
     session.execute(CREATE_KEYSPACE)
 
+    # Create tables
+    
+    session.prepare(CREATE_TABLE_MOVIE_BY_TITLE)
+    session.execute(CREATE_TABLE_MOVIE_BY_TITLE)
+
+    session.prepare(CREATE_TABLE_MOVIE_BY_GENRE)
+    session.execute(CREATE_TABLE_MOVIE_BY_GENRE)
+
 def insert_movie(session, title, year, director, genre, rating):
-    # session.prepare(INSERT_MOVIE_TITLE)
-    # session.execute(CREATE_KEYSPACE)
+    new_movie_id = uuid.uuid4()
+    session.prepare(INSERT_MOVIE_TITLE)
+    session.execute(INSERT_MOVIE_TITLE, (new_movie_id, title, year, director, genre, rating))
+
+    session.prepare(INSERT_MOVIE_GENRE)
+    session.execute(INSERT_MOVIE_GENRE, (new_movie_id, genre, title, year, director, rating))
+
     pass
 
 def query_by_title(session, title, year):
