@@ -29,11 +29,11 @@ CREATE_TABLE_MOVIE_BY_GENRE = """CREATE TABLE IF NOT EXISTS movies.movie_by_genr
 INSERT_MOVIE_TITLE = "INSERT INTO movies.movie_by_title (movie_id, title, release_year, director, genre, rating) VALUES (?, ?, ?, ?, ?, ?);"
 INSERT_MOVIE_GENRE = "INSERT INTO movies.movie_by_genre (movie_id, title, release_year, director, genre, rating) VALUES (?, ?, ?, ?, ?, ?);"
 DELETE_MOVIE_TITLE = "DELETE FROM movies.movie_by_title WHERE title=? AND release_year=?"
-DELETE_MOVIE_GENRE = "DELETE FROM movies.movie_by_genre WHERE genre=? AND title=? AND rating=?"
+DELETE_MOVIE_GENRE = "DELETE FROM movies.movie_by_genre WHERE genre=? AND movie_id=? AND rating=?"
 UPDATE_DIRECTOR_IN_TITLE = "UPDATE movies.movie_by_title SET director=? WHERE title=? AND release_year=?"
-UPDATE_DIRECTOR_IN_GENRE = "UPDATE movies.movie_by_genre SET director=? WHERE genre=? AND title=? AND rating=?"
+UPDATE_DIRECTOR_IN_GENRE = "UPDATE movies.movie_by_genre SET director=? WHERE genre=? AND rating=? AND movie_id=?"
 SELECT_BY_TITLE = "SELECT * FROM movies.movie_by_title WHERE title=? AND release_year=?"
-SELECT_BY_GENRE = "SELECT * FROM movies.movie_by_genre WHERE genre=? AND title=? AND rating=?"
+SELECT_BY_GENRE = "SELECT * FROM movies.movie_by_genre WHERE genre=?"
 
 
 # ==============================
@@ -67,28 +67,28 @@ def query_by_title(session, title, year):
     rows = session.execute(stmt, (title, year))
     return rows
 
-def query_by_genre(session, genre, title, rating):
+def query_by_genre(session, genre):
     stmt = session.prepare(SELECT_BY_GENRE)
-    rows = session.execute(stmt, (genre, title, rating))
+    rows = session.execute(stmt, (genre, ))
     return rows
 
-def update_movie_director(session, title, genre, year, rating, new_director):
+def update_movie_director(session, title, genre, year, rating, movie_id, new_director):
     stmt = session.prepare(UPDATE_DIRECTOR_IN_TITLE)
     session.execute(stmt, (new_director, title, year))
 
     stmt = None  # Hacemos esto para evitar problemas de referencias
 
     stmt = session.prepare(UPDATE_DIRECTOR_IN_GENRE)
-    session.execute(stmt, (new_director, genre, title, rating))
+    session.execute(stmt, (new_director, genre, rating, movie_id))
 
-def delete_movie(session, title, genre, release_year, rating):
+def delete_movie(session, title, genre, release_year, rating, movie_id):
     stmt = session.prepare(DELETE_MOVIE_TITLE)
     session.execute(stmt, (title, release_year))
 
     stmt = None
 
     stmt = session.prepare(DELETE_MOVIE_GENRE)
-    session.execute(stmt, (genre, title, rating))
+    session.execute(stmt, (genre, movie_id, rating))
 
 # ==============================
 # Menú
@@ -142,7 +142,6 @@ def main():
             genre = input("Género: ")
             data = query_by_genre(session, genre)
             if data:
-
                 print(
                     f"{'ID':<{id_width}}|{'Título':<{title_width}}|{'Año':<{year_width}}|{'Director':<{director_width}}|{'Género':<{genre_width}}|{'Rating':<{rating_width}}|"
                 )
@@ -158,8 +157,9 @@ def main():
             genre = input("Género: ")
             year = int(input("Año: "))
             rating = float(input("Rating: "))
+            movie_id = uuid.UUID(input("ID de la película (UUID): "))
             new_director = input("Nuevo Director: ")
-            update_movie_director(session, title, genre, year, rating, new_director)
+            update_movie_director(session, title, genre, year, rating, movie_id, new_director)
         elif choice == "5":
             # Eliminar de movie_by_title -> title, release_year
             # Eliminar de movie_by_genre -> genre, rating
@@ -167,7 +167,8 @@ def main():
             genre = input("Género: ")
             rating = float(input("Rating: "))
             release_year = int(input("Año: "))
-            delete_movie(session, title, genre, release_year, rating)
+            movie_id = uuid.UUID(input("ID de la película (UUID): "))
+            delete_movie(session, title, genre, release_year, rating, movie_id)
         elif choice == '0':
             session.shutdown()
             break
